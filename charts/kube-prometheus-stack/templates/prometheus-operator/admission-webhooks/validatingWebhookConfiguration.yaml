@@ -41,4 +41,9 @@ webhooks:
     timeoutSeconds: {{ .Values.prometheusOperator.admissionWebhooks.timeoutSeconds }}
     admissionReviewVersions: ["v1", "v1beta1"]
     sideEffects: None
+    {{- if and .Values.prometheusOperator.admissionWebhooks.namespaceSelector .Values.prometheusOperator.admissionWebhooks.namespaceSelector.matchExpressions }}
+    namespaceSelector:
+      matchExpressions:
+      {{- .Values.prometheusOperator.admissionWebhooks.namespaceSelector.matchExpressions | toYaml | nindent 6 }}
+    {{- end }}
 {{- end }}
