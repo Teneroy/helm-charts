@@ -41,4 +41,16 @@ webhooks:
     timeoutSeconds: {{ .Values.prometheusOperator.admissionWebhooks.timeoutSeconds }}
     admissionReviewVersions: ["v1", "v1beta1"]
     sideEffects: None
+    {{- if .Values.prometheusOperator.admissionWebhooks.namespaceSelector  }}
+    namespaceSelector:
+      matchExpressions: 
+      {{- range $expression := .Values.prometheusOperator.admissionWebhooks.namespaceSelector.matchExpressions }} 
+      - key: {{ $expression.key }}
+        operator: {{ $expression.operator }}
+        values:
+        {{- range $value := $expression.values }}
+          - {{ $value }}
+        {{- end }} 
+      {{- end }}
+    {{- end }}
 {{- end }}
