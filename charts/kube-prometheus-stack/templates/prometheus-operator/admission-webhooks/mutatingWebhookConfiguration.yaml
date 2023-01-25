@@ -41,9 +41,23 @@ webhooks:
     timeoutSeconds: {{ .Values.prometheusOperator.admissionWebhooks.timeoutSeconds }}
     admissionReviewVersions: ["v1", "v1beta1"]
     sideEffects: None
-    {{- if and .Values.prometheusOperator.admissionWebhooks.namespaceSelector .Values.prometheusOperator.admissionWebhooks.namespaceSelector.matchExpressions }}
+    {{- if or .Values.prometheusOperator.denyNamespaces .Values.prometheusOperator.namespaces }}
     namespaceSelector:
       matchExpressions:
-      {{- .Values.prometheusOperator.admissionWebhooks.namespaceSelector.matchExpressions | toYaml | nindent 6 }}
+      {{- if .Values.prometheusOperator.denyNamespaces }}
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+        {{- range $namespace := .Values.prometheusOperator.denyNamespaces }} 
+        - {{ $namespace }}
+        {{- end }}
+      {{- else if and .Values.prometheusOperator.namespaces .Values.prometheusOperator.namespaces.additional }}
+      - key: kubernetes.io/metadata.name
+        operator: In
+        values:
+        {{- range $namespace := .Values.prometheusOperator.namespaces.additional }} 
+        - {{ $namespace }}
+        {{- end }}
+      {{- end }}
     {{- end }}
 {{- end }}
